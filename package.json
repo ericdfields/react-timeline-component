@@ -23,6 +23,7 @@
     "react": "^0.14.0",
     "react-art": "^0.14.0",
     "react-dom": "^0.14.0",
+    "shortid": "^2.2.4",
     "sort-by": "^1.1.1",
     "underscore": "^1.8.3"
   }

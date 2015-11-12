@@ -42,10 +42,6 @@ export default class AppComponent extends React.Component {
       {
         date: '2013-06-16',
         name: 'Referral date'
-      },
-      {
-        date: '2015-02-16',
-        name: 'Some rando date'
       }
     ]
 

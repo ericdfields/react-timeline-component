@@ -2,6 +2,7 @@ import React from 'react'
 
 var moment = require('moment')
 var _ = require('lodash')
+var shortid = require('shortid')
 
 function dateToLabel(date) {
   return moment(date).format('MMM DD YYYY').toUpperCase()
@@ -52,6 +53,26 @@ class Label extends React.Component {
 
 export default class TimelineComponent extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      showingPopover: false
+    }
+  }
+
+  showPopover() {
+    alert('asdf')
+    // this.setState({
+    //   showingPopover: popoverId
+    // })
+  }
+
+  hidePopover(popoverId) {
+    this.setState({
+      showingPopover: false
+    })
+  }
+
   render() {
 
     const SVG_WIDTH = 1000
@@ -66,19 +87,13 @@ export default class TimelineComponent extends React.Component {
     // let uniqueDates = _.uniq(sortedData,'date').map( d => {return d.date} )
     let monthsBetweenExtremes = diffMonthsBetweenDates(sortedData[0].date, sortedData[sortedData.length - 1].date)
 
+    let popoverIdPrefix = shortid.generate()
+
     const SVG_WIDTH_INTERVAL = SVG_WORKING_WIDTH / monthsBetweenExtremes
 
     function translateX(x) {
       return `translate(${x},0)`
     }
-
-    // function segmentWidth(uniqueDates,offset) {
-    //   if (uniqueDates.length > 2) {
-    //     return diffMonthsBetweenDates(uniqueDates[offset-1], uniqueDates[offset]) * SVG_WIDTH_INTERVAL
-    //   } else {
-    //     return SVG_WORKING_WIDTH
-    //   }
-    // }
 
     function labelGroupPos(groupIndex) {
       if (sortedDataUniqByDate[groupIndex - 1] === undefined) {
@@ -92,35 +107,25 @@ export default class TimelineComponent extends React.Component {
 
     let monthMarkers = []
     for (var i = -1; i < monthsBetweenExtremes; i++) {
-      monthMarkers.push(
-        <rect width={ 1 } height={ 5 } y={ 0 } fill={ '#000000' } 
-          x={ (SVG_WORKING_WIDTH / monthsBetweenExtremes) * (i+1) }
-          key={ i } />
-      )
+      if (monthsBetweenExtremes != 0) {
+        monthMarkers.push(
+          <rect width={ 1 } height={ 5 } y={ 0 } fill={ '#000000' } 
+            x={ (SVG_WORKING_WIDTH / monthsBetweenExtremes) * (i+1) }
+            key={ i } />
+        )
+      }
     }
 
     return (
       <div style={ {position: 'relative', height: '90px' } }>
         <svg width={ SVG_WIDTH } height={ SVG_HEIGHT }>
           <g transform={ translateX( SVG_VERTICAL_PADDING )}>
-            { /*
-            { uniqueDates.map( (date,index) => {
-              return (
-                <g key={ index } transform={ translateX( (SVG_WORKING_WIDTH / uniqueDates.length) * index ) }>
-                  <rect width={ segmentWidth(uniqueDates,index) } height={ SVG_HEIGHT - 40 } fill={ COLOR_A } />
-                  <g transform={ translateX( 0 ) }>
-                    <Circle x={ 20 } y={ 4 } />
-                    <Label value={ date.date } />
-                  </g>
-                </g>
-              )
-            })}
-            */ }
-            <rect width={ SVG_WORKING_WIDTH} height={ 1 } />
+            <rect width={ SVG_WORKING_WIDTH } height={ 1 } />
             { sortedDataUniqByDate.map( (date, index) => {
+                var popoverId = `${popoverIdPrefix}-${index}`
                 return(
                   <g transform={ translateX( labelGroupPos(index) ) } key={ index }>
-                    <Circle x={ 20 } y={ 4 } />
+                    <Circle x={ 20 } y={ 4 } onClick={ this.showPopover.bind(this) } onmouseout={ this.hidePopover.bind(this) } />
                     <Label value={ date.date } index={ index } uniqueLabelsCount={ sortedDataUniqByDate.length } />
                   </g>
                 )
@@ -141,12 +146,16 @@ export default class TimelineComponent extends React.Component {
                 padding: '.5em', 
                 borderRadius: '6px',
                 width: '100px',
-                minHeight: '2em'
-              } }>
+                minHeight: '2em',
+                display: this.state.showingPopover === `${popoverIdPrefix}-${index}` ? 'block' : 'none'
+              } } key={ index }>
                 {
                   _.where(sortedData, { date: date.date }).map( (item,itemIndex) => {
+                    var textStyles = {
+                      margin: '0 0 .5em 0',
+                    }
                     return(
-                      <div style={{margin: '0 0 .5em 0'}}>
+                      <div style={ textStyles } key={ itemIndex }>
                         { item.name }
                       </div>
                     )
