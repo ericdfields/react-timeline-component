@@ -1,3 +1,5 @@
+require('./TimelineComponent.css')
+
 import React from 'react'
 
 var moment = require('moment')
@@ -143,9 +145,9 @@ export default class TimelineComponent extends React.Component {
         { sortedDataUniqByDate.map( (date, index) => {
 
             return(
-              <div style={ { 
+              <div className='timelineComponentPopover' style={ { 
                 position: 'absolute', 
-                left: labelGroupPos(index) + 'px', 
+                left: (labelGroupPos(index) - 4) + 'px', 
                 border: '2px solid #979797', 
                 backgroundColor: 'white', 
                 padding: '.5em', 
