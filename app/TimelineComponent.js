@@ -22,7 +22,7 @@ class Circle extends React.Component {
     const transform = `translate(${this.props.x},${this.props.y})`
     return (
       <path transform={ transform } d="M7 12c2.76 0 5-2.24 5-5S9.76 2 7 2 2 4.24 2 7s2.24 5 5 5z" 
-      strokeOpacity=".492" stroke="#2A2A2A" strokeWidth=".5" fill="#FFF" fillRule="evenodd"/>
+      strokeOpacity=".492" stroke="#2A2A2A" strokeWidth=".5" fill="#fff" fillRule="evenodd"/>
     )
   }
 
@@ -60,14 +60,14 @@ export default class TimelineComponent extends React.Component {
     }
   }
 
-  showPopover() {
-    alert('asdf')
-    // this.setState({
-    //   showingPopover: popoverId
-    // })
+  showPopover(popoverId) {
+    console.log('clicked')
+    this.setState({
+      showingPopover: popoverId
+    })
   }
 
-  hidePopover(popoverId) {
+  hidePopover() {
     this.setState({
       showingPopover: false
     })
@@ -87,7 +87,7 @@ export default class TimelineComponent extends React.Component {
     // let uniqueDates = _.uniq(sortedData,'date').map( d => {return d.date} )
     let monthsBetweenExtremes = diffMonthsBetweenDates(sortedData[0].date, sortedData[sortedData.length - 1].date)
 
-    let popoverIdPrefix = shortid.generate()
+    let popoverIdPrefix = 'timelineComponentPopover'
 
     const SVG_WIDTH_INTERVAL = SVG_WORKING_WIDTH / monthsBetweenExtremes
 
@@ -124,8 +124,12 @@ export default class TimelineComponent extends React.Component {
             { sortedDataUniqByDate.map( (date, index) => {
                 var popoverId = `${popoverIdPrefix}-${index}`
                 return(
-                  <g transform={ translateX( labelGroupPos(index) ) } key={ index }>
-                    <Circle x={ 20 } y={ 4 } onClick={ this.showPopover.bind(this) } onmouseout={ this.hidePopover.bind(this) } />
+                  <g transform={ translateX( labelGroupPos(index) ) } 
+                     key={ index } 
+                     onMouseOver={ this.showPopover.bind(this, popoverId) } 
+                     onMouseOut={ this.hidePopover.bind(this) }
+                     style={ { cursor: 'pointer' } }>
+                    <Circle x={ 20 } y={ 4 } />
                     <Label value={ date.date } index={ index } uniqueLabelsCount={ sortedDataUniqByDate.length } />
                   </g>
                 )
@@ -137,6 +141,7 @@ export default class TimelineComponent extends React.Component {
 
         <div style={{ fontFamily: 'sans-serif', font: 'caption', fontWeight: 400, fontSize: 11, position: 'relative', left: `${SVG_VERTICAL_PADDING - 25}px` }}>
         { sortedDataUniqByDate.map( (date, index) => {
+
             return(
               <div style={ { 
                 position: 'absolute', 
@@ -147,7 +152,8 @@ export default class TimelineComponent extends React.Component {
                 borderRadius: '6px',
                 width: '100px',
                 minHeight: '2em',
-                display: this.state.showingPopover === `${popoverIdPrefix}-${index}` ? 'block' : 'none'
+                display: (this.state.showingPopover === `${popoverIdPrefix}-${index}`) ? 'block' : 'none',
+                zIndex: 1
               } } key={ index }>
                 {
                   _.where(sortedData, { date: date.date }).map( (item,itemIndex) => {
