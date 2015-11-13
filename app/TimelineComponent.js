@@ -18,40 +18,26 @@ function diffMonthsBetweenDates(firstDate,lastDate) {
   return moment(lastDate).diff(moment(firstDate),'months')
 }
 
-class Circle extends React.Component {
-
-  render() {
-    const transform = `translate(${this.props.x},${this.props.y})`
-    return (
-      <path transform={ transform } d="M7 12c2.76 0 5-2.24 5-5S9.76 2 7 2 2 4.24 2 7s2.24 5 5 5z" 
-      strokeOpacity=".492" stroke="#2A2A2A" strokeWidth=".5" fill="#fff" fillRule="evenodd"/>
-    )
-  }
-
+function transformTranslate(x,y) {
+  return `translate(${x},${y})`
 }
+
+const Circle = ({x,y}) =>
+  <path transform={ transformTranslate(x,y) } d="M7 12c2.76 0 5-2.24 5-5S9.76 2 7 2 2 4.24 2 7s2.24 5 5 5z" 
+  strokeOpacity=".492" stroke="#2A2A2A" strokeWidth=".5" fill="#fff" fillRule="evenodd"/>
 
 Circle.props = {
   x: 0,
   y: 0
 }
 
-class Label extends React.Component {
-
-  render() {
-
-    const { uniqueLabelsCount,value,index } = this.props
-
-    return(
-      <text x={ 0 } y={ 30 } 
-            fontFamily="Verdana" 
-            fontSize="9"
-            width="100%">
-        { dateToLabel(value) }
-      </text>
-    )
-  }
-
-}
+const Label = ({value}) =>
+  <text x={ 0 } y={ 30 } 
+        fontFamily="Verdana" 
+        fontSize="9"
+        width="100%">
+    { dateToLabel(value) }
+  </text>
 
 export default class TimelineComponent extends React.Component {
 
