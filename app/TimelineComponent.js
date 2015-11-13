@@ -4,7 +4,11 @@ import React from 'react'
 
 var moment = require('moment')
 var _ = require('lodash')
-var shortid = require('shortid')
+
+const SVG_WIDTH = 1000
+const SVG_HEIGHT = 40
+const SVG_VERTICAL_PADDING = 80
+const SVG_WORKING_WIDTH = SVG_WIDTH - (SVG_VERTICAL_PADDING * 2)
 
 function dateToLabel(date) {
   return moment(date).format('MMM DD YYYY').toUpperCase()
@@ -20,6 +24,19 @@ function diffMonthsBetweenDates(firstDate,lastDate) {
 
 function transformTranslate(x,y) {
   return `translate(${x},${y})`
+}
+
+function labelGroupPos(dataArray,groupIndex) {
+
+  let widthInterval = SVG_WORKING_WIDTH / diffMonthsBetweenDates(dataArray[0].date, dataArray[dataArray.length - 1].date)
+
+  if (dataArray[groupIndex - 1] === undefined) {
+    return -26
+  } else {
+    let totalMonthsSoFar = diffMonthsBetweenDates(dataArray[0].date, dataArray[groupIndex-1].date)
+    let monthsBetweenThisDateAndLast = diffMonthsBetweenDates(dataArray[groupIndex-1].date, dataArray[groupIndex].date)
+    return ((totalMonthsSoFar + monthsBetweenThisDateAndLast) * widthInterval) - 26
+  }
 }
 
 const Circle = ({x,y}) =>
@@ -48,10 +65,9 @@ export default class TimelineComponent extends React.Component {
     }
   }
 
-  showPopover(popoverId) {
-    console.log('clicked')
+  showPopover(index) {
     this.setState({
-      showingPopover: popoverId
+      showingPopover: index
     })
   }
 
@@ -63,34 +79,11 @@ export default class TimelineComponent extends React.Component {
 
   render() {
 
-    const SVG_WIDTH = 1000
-    const SVG_HEIGHT = 40
-    const SVG_VERTICAL_PADDING = 80
-    const SVG_WORKING_WIDTH = SVG_WIDTH - (SVG_VERTICAL_PADDING * 2)
-    const COLOR_A = '#6192cf'
-    const COLOR_B = '#68c660'
-
     let sortedData = sortDataByDates(this.props.data)
     let sortedDataUniqByDate = _.uniq(sortedData,'date')
-    // let uniqueDates = _.uniq(sortedData,'date').map( d => {return d.date} )
-    let monthsBetweenExtremes = diffMonthsBetweenDates(sortedData[0].date, sortedData[sortedData.length - 1].date)
-
-    let popoverIdPrefix = 'timelineComponentPopover'
-
-    const SVG_WIDTH_INTERVAL = SVG_WORKING_WIDTH / monthsBetweenExtremes
 
     function translateX(x) {
       return `translate(${x},0)`
-    }
-
-    function labelGroupPos(groupIndex) {
-      if (sortedDataUniqByDate[groupIndex - 1] === undefined) {
-        return -26
-      } else {
-        var totalMonthsSoFar = diffMonthsBetweenDates(sortedDataUniqByDate[0].date, sortedDataUniqByDate[groupIndex-1].date)
-        var monthsBetweenThisDateAndLast = diffMonthsBetweenDates(sortedDataUniqByDate[groupIndex-1].date, sortedDataUniqByDate[groupIndex].date)
-        return ((totalMonthsSoFar + monthsBetweenThisDateAndLast) * SVG_WIDTH_INTERVAL) - 26
-      }
     }
 
     let monthMarkers = []
@@ -110,11 +103,10 @@ export default class TimelineComponent extends React.Component {
           <g transform={ translateX( SVG_VERTICAL_PADDING )}>
             <rect width={ SVG_WORKING_WIDTH } height={ 1 } />
             { sortedDataUniqByDate.map( (date, index) => {
-                var popoverId = `${popoverIdPrefix}-${index}`
                 return(
                   <g transform={ translateX( labelGroupPos(index) ) } 
                      key={ index } 
-                     onMouseOver={ this.showPopover.bind(this, popoverId) } 
+                     onMouseOver={ this.showPopover.bind(this, index) } 
                      onMouseOut={ this.hidePopover.bind(this) }
                      style={ { cursor: 'pointer' } }>
                     <Circle x={ 20 } y={ 4 } />
@@ -127,39 +119,7 @@ export default class TimelineComponent extends React.Component {
           </g>
         </svg>
 
-        <div style={{ fontFamily: 'sans-serif', font: 'caption', fontWeight: 400, fontSize: 11, position: 'relative', left: `${SVG_VERTICAL_PADDING - 25}px` }}>
-        { sortedDataUniqByDate.map( (date, index) => {
-
-            return(
-              <div className='timelineComponentPopover' style={ { 
-                position: 'absolute', 
-                left: (labelGroupPos(index) - 4) + 'px', 
-                border: '2px solid #979797', 
-                backgroundColor: 'white', 
-                padding: '.5em', 
-                borderRadius: '6px',
-                width: '100px',
-                minHeight: '2em',
-                display: (this.state.showingPopover === `${popoverIdPrefix}-${index}`) ? 'block' : 'none',
-                zIndex: 1
-              } } key={ index }>
-                {
-                  _.where(sortedData, { date: date.date }).map( (item,itemIndex) => {
-                    var textStyles = {
-                      margin: '0 0 .5em 0',
-                    }
-                    return(
-                      <div style={ textStyles } key={ itemIndex }>
-                        { item.name }
-                      </div>
-                    )
-                  })
-                }
-              </div>
-            )
-          }
-        )}
-        </div>
+        <TimelineComponentPopovers data={ sortedDataUniqByDate } showingPopover={ this.state.showingPopover } />
 
       </div>
     )
@@ -167,3 +127,68 @@ export default class TimelineComponent extends React.Component {
 
 }
 
+class TimelineComponentPopovers extends React.Component {
+
+  render() {
+
+    let style = { 
+      fontFamily: 'sans-serif', 
+      font: 'caption', 
+      fontWeight: 400, 
+      fontSize: 11, 
+      position: 'relative', 
+      left: `${SVG_VERTICAL_PADDING - 25}px` 
+    }
+
+    return (
+      <div style={ style }>
+        { data.map( (date, index) =>
+          <TimlineComponentPopover 
+            data={ date } 
+            offset={ index } 
+            visible={ this.props.showingPopover === index } 
+            key={ index } />
+        )}
+      </div>
+    )
+  }
+
+}
+
+class TimelineComponentPopover extends React.Comonent {
+
+  render() {
+
+    const { showingPopover,offset } = this.props
+
+    let styles = { 
+      position: 'absolute', 
+      left: (labelGroupPos(offset) - 4) + 'px', 
+      border: '2px solid #979797', 
+      backgroundColor: 'white', 
+      padding: '.5em', 
+      borderRadius: '6px',
+      width: '100px',
+      minHeight: '2em',
+      display: this.props.visible ? 'block' : 'none',
+      zIndex: 1
+    }
+    return(
+      <div className='timelineComponentPopover' style={ styles }>
+        {
+          _.where(sortedData, { date: date.date }).map( (item,itemIndex) => {
+            var textStyles = {
+              margin: '0 0 .5em 0',
+            }
+            return(
+              <div style={ textStyles } key={ itemIndex }>
+                { item.name }
+              </div>
+            )
+          })
+        }
+      </div>
+    )
+  }
+
+}
