@@ -87,6 +87,7 @@ export default class TimelineComponent extends React.Component {
     }
 
     let monthMarkers = []
+    let monthsBetweenExtremes = diffMonthsBetweenDates(sortedData[0].date, sortedData[sortedData.length - 1].date)
     for (var i = -1; i < monthsBetweenExtremes; i++) {
       if (monthsBetweenExtremes != 0) {
         monthMarkers.push(
@@ -104,7 +105,7 @@ export default class TimelineComponent extends React.Component {
             <rect width={ SVG_WORKING_WIDTH } height={ 1 } />
             { sortedDataUniqByDate.map( (date, index) => {
                 return(
-                  <g transform={ translateX( labelGroupPos(index) ) } 
+                  <g transform={ translateX( labelGroupPos(sortedDataUniqByDate,index) ) } 
                      key={ index } 
                      onMouseOver={ this.showPopover.bind(this, index) } 
                      onMouseOut={ this.hidePopover.bind(this) }
@@ -119,7 +120,7 @@ export default class TimelineComponent extends React.Component {
           </g>
         </svg>
 
-        <TimelineComponentPopovers data={ sortedDataUniqByDate } showingPopover={ this.state.showingPopover } />
+        <Popovers data={ sortedData } showingPopover={ this.state.showingPopover } />
 
       </div>
     )
@@ -127,9 +128,11 @@ export default class TimelineComponent extends React.Component {
 
 }
 
-class TimelineComponentPopovers extends React.Component {
+class Popovers extends React.Component {
 
   render() {
+
+    const { data,showingPopover } = this.props
 
     let style = { 
       fontFamily: 'sans-serif', 
@@ -142,11 +145,12 @@ class TimelineComponentPopovers extends React.Component {
 
     return (
       <div style={ style }>
-        { data.map( (date, index) =>
-          <TimlineComponentPopover 
-            data={ date } 
+        { _.uniq(data,'date').map( (date, index) =>
+          <Popover 
+            data={ data }
+            date={ date } 
             offset={ index } 
-            visible={ this.props.showingPopover === index } 
+            visible={ showingPopover === index } 
             key={ index } />
         )}
       </div>
@@ -155,15 +159,15 @@ class TimelineComponentPopovers extends React.Component {
 
 }
 
-class TimelineComponentPopover extends React.Comonent {
+class Popover extends React.Component {
 
   render() {
 
-    const { showingPopover,offset } = this.props
+    const { showingPopover,offset,data,date } = this.props
 
     let styles = { 
       position: 'absolute', 
-      left: (labelGroupPos(offset) - 4) + 'px', 
+      left: (labelGroupPos(_.uniq(data,'date'),offset) - 4) + 'px', 
       border: '2px solid #979797', 
       backgroundColor: 'white', 
       padding: '.5em', 
@@ -176,7 +180,7 @@ class TimelineComponentPopover extends React.Comonent {
     return(
       <div className='timelineComponentPopover' style={ styles }>
         {
-          _.where(sortedData, { date: date.date }).map( (item,itemIndex) => {
+          _.where(data, { date: date.date }).map( (item,itemIndex) => {
             var textStyles = {
               margin: '0 0 .5em 0',
             }
