@@ -1,0 +1,23 @@
+.timelineComponentPopover:after, .timelineComponentPopover:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.timelineComponentPopover:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #ffffff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+.timelineComponentPopover:before {
+  border-color: rgba(245, 0, 0, 0);
+  border-bottom-color: #2A2A2A;
+  border-width: 11px;
+  margin-left: -11px;
+}

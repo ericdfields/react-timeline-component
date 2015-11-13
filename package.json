@@ -1,10 +1,10 @@
 {
   "name": "react-timeline-component",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "scripts": {
     "dev": "webpack-dev-server --progress --colors --hot --inline",
-    "build": "babel --presets stage-0 app/TimelineComponent.js > dist/index.js"
+    "build": "babel --presets stage-0 app/TimelineComponent.js > dist/index.js; cp app/TimelineComponent.css dist/"
   },
   "author": "Eric D. Fields",
   "license": "MIT",
