@@ -1,6 +1,6 @@
 {
   "name": "react-timeline-component",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/index.js",
   "scripts": {
     "dev": "webpack-dev-server --progress --colors --hot --inline",
